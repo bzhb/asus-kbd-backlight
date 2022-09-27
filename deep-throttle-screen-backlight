@@ -1,18 +1,19 @@
 #!/bin/bash
-# Author : Renan Fargetton 2012
+# Author : Renan Fargetton 2012-2022
 # Licence : GNU GPL v3 or later
 
-path="/sys/class/backlight/intel_backlight"
+#path="/sys/class/backlight/intel_backlight"
+backlight_path=$(readlink -f /sys/class/backlight/*/)
 # alternative interface (0 < x < 10)
-#path="/sys/class/backlight/acpi_video0/"
+#backlight_path="/sys/class/backlight/acpi_video0/"
 
 # max should be 4296
-max=$(cat ${path}/max_brightness)
+max=$(cat ${backlight_path}/max_brightness)
 # step: represent the difference between previous and next brightness
 step=$(($max/10))
 # for a value smaller than treshold, the steps are smaller for a more accurate setting at low intensity
 treshold=$((2*$step))
-previous=$(cat ${path}/brightness)
+previous=$(cat ${backlight_path}/brightness)
 
 function commit {
 	if [[ $1 = [0-9]* ]]
@@ -26,7 +27,7 @@ function commit {
 		else 
 			next=$1
 		fi
-		echo $next >> ${path}/brightness
+		echo $next >> ${backlight_path}/brightness
 		exit 0
 	else 
 		exit 1
@@ -64,16 +65,16 @@ case "$1" in
  	 ;;
  allowusers)
 	 # Allow members of users group to change brightness
-	 sudo /usr/bin/chgrp users ${path}/brightness
-	 sudo /usr/bin/chmod g+w ${path}/brightness
+	 sudo /usr/bin/chgrp users ${backlight_path}/brightness
+	 sudo /usr/bin/chmod g+w ${backlight_path}/brightness
    ;;
  u)
 	 $0 allowusers
    ;;
  disallowusers)
 	 # Allow members of users group to change brightness
-	 sudo /usr/bin/chgrp root ${path}/brightness
-	 sudo /usr/bin/chmod g-w ${path}/brightness
+	 sudo /usr/bin/chgrp root ${backlight_path}/brightness
+	 sudo /usr/bin/chmod g-w ${backlight_path}/brightness
    ;;
  *)
 	 commit	$1

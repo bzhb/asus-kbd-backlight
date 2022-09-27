@@ -1,0 +1,14 @@
+post_install() {
+    echo
+    echo "By default, only root may use the deepthrottle-screen-backlight command."
+    echo "Run \"deep-throttle-screen-backlight allowusers\" to change this, or let"
+    echo "You must be a member of group «users» for it to work"
+    echo "systemd do this automatically at boot by saying:"
+    echo
+    echo -e "\tsystemctl enable deep-throttle-screen-backlight.service"
+    echo
+    echo "You will most probably want to create keyboards bindings to :"
+    echo "  /usr/bin/deep-throttle-screen-backlight up"
+    echo "  /usr/bin/deep-throttle-screen-backlight down"
+    echo
+}
