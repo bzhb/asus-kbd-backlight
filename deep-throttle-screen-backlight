@@ -3,82 +3,64 @@
 # Licence : GNU GPL v3 or later
 
 #path="/sys/class/backlight/intel_backlight"
-backlight_path=$(readlink -f /sys/class/backlight/*/)
 # alternative interface (0 < x < 10)
 #backlight_path="/sys/class/backlight/acpi_video0/"
+# TODO add check
+backlight_path=$(readlink -f /sys/class/backlight/*/)
 
 # max should be 4296
 max=$(cat ${backlight_path}/max_brightness)
-# step: represent the difference between previous and next brightness
+# step: represent the absolute difference between previous and next brightness
 step=$(($max/10))
 # for a value smaller than treshold, the steps are smaller for a more accurate setting at low intensity
 treshold=$((2*$step))
 previous=$(cat ${backlight_path}/brightness)
 
 function commit {
-	if [[ $1 = [0-9]* ]]
-	then 
-		if [[ $1 -gt $max ]]
-		then 
-			next=$max
-		elif [[ $1 -lt 0 ]]
-		then 
-			next=0
-		else 
-			next=$1
-		fi
-		echo $next >> ${backlight_path}/brightness
-		exit 0
-	else 
-		exit 1
+    # change brightness by writting to interface file
+    # with a check of target brightness : 0 <= $1 <= $max
+	[[ $1 = [0-9]* ]] || exit 1
+	if [[ $1 -gt $max ]] ; then
+		next=$max
+	elif [[ $1 -lt 0 ]] ; then
+		next=0
+	else
+		next=$1
 	fi
+	echo $next >> ${backlight_path}/brightness
+	exit 0
 }
 
 case "$1" in
  up)
-	if [[ $previous -le $treshold ]]
-		then 
-			step=$(($previous/4))
-			if [[ $previous -le 4 ]] ; then step=1 ; fi
+	if [[ $previous -le $treshold ]] ; then
+		step=$(($previous/4))
+		if [[ $previous -le 4 ]] ; then step=1 ; fi
 	fi
-	 commit $(($previous + $step))
+	commit $(($previous + $step))
    ;;
  down)
-	if [[ $previous -le $treshold ]]
-		then 
-			step=$(($previous/4));
-			if [[ $previous -le 4 ]] ; then step=1 ; fi
+	if [[ $previous -le $treshold ]] ; then
+		step=$(($previous/4))
+		if [[ $previous -le 4 ]] ; then step=1 ; fi
 	fi
 	commit $(($previous - $step))
    ;;
- max)
-	 commit $max
-   ;;
- off)
-	 commit 0
-   ;;
- show)
-	 echo $previous
-   ;;
- night)
-	 commit $(($max/4)) 
- 	 ;;
  allowusers)
-	 # Allow members of users group to change brightness
-	 sudo /usr/bin/chgrp users ${backlight_path}/brightness
-	 sudo /usr/bin/chmod g+w ${backlight_path}/brightness
-   ;;
- u)
-	 $0 allowusers
+	# Allow members of users group to change brightness
+	sudo /usr/bin/chgrp users ${backlight_path}/brightness
+	sudo /usr/bin/chmod g+w ${backlight_path}/brightness
    ;;
  disallowusers)
-	 # Allow members of users group to change brightness
-	 sudo /usr/bin/chgrp root ${backlight_path}/brightness
-	 sudo /usr/bin/chmod g-w ${backlight_path}/brightness
+	# Allow members of users group to change brightness
+	sudo /usr/bin/chgrp root ${backlight_path}/brightness
+	sudo /usr/bin/chmod g-w ${backlight_path}/brightness
    ;;
- *)
-	 commit	$1
+ max  ) commit $max        ;;
+ off  ) commit 0           ;;
+ show ) echo $previous     ;;
+ night) commit $(($max/4)) ;;
+ u    ) $0 allowusers      ;;
+ *    ) commit	$1
 esac
-
 exit 0
-

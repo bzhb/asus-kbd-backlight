@@ -1,14 +1,14 @@
 # Author:  Stefan Majewsky <majewsky at-the-server gmx with-the-tld net>
-# Author:  2015-2022 Renan Fargetton
+# Author:  2012-2022 Renan Fargetton
 
 pkgname=deep-throttle-screen-backlight
 pkgver=1.1
 pkgrel=1
 pkgdesc="Helper for adjusting screen backlight brightness with deep throttle on the dim side"
-url="https://github.com/bzhb/asus-screen-backlight"
+url="https://github.com/bzhb/deep-throttle-screen-backlight"
 arch=('any')
 license=(GPLv3+)
-depends=('bash')
+depends=('bash' 'sudo' 'coreutils')
 optdepends=('systemd: automatically grant user access to keyboard backlight control')
 install="deep-throttle-screen-backlight.install"
 
